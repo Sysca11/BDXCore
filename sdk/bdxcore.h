@@ -1,13 +1,15 @@
+#pragma once
+#include <stdio.h>
+#include <string>
+#include <string_view>
 extern "C" {
 	_declspec(dllimport) int HookFunction(void* oldfunc, void** poutold, void* newfunc);
 	_declspec(dllimport) void* dlsym_real(char const* name);
 }
-#include<string_view>
-using std::string_view;
 #define BKDR_MUL 131
 #define BKDR_ADD 0
 typedef unsigned long long CHash;
-constexpr CHash do_hash(string_view x) {
+constexpr CHash do_hash(std::string_view x) {
 	CHash rval = 0;
 	for (size_t i = 0; i < x.size(); ++i) {
 		rval *= BKDR_MUL;
@@ -16,7 +18,7 @@ constexpr CHash do_hash(string_view x) {
 	}
 	return rval;
 }
-constexpr CHash do_hash2(string_view x) {
+constexpr CHash do_hash2(std::string_view x) {
 	//ap hash
 	CHash rval = 0;
 	for (size_t i = 0; i < x.size(); ++i) {
@@ -38,7 +40,7 @@ inline T const& dAccess(void const* ptr) {
 	return *(T*)(((uintptr_t)ptr) + off);
 }
 template <typename T>
-inline T& dAccess(void* ptr,uintptr_t off) {
+inline T& dAccess(void* ptr, uintptr_t off) {
 	return *(T*)(((uintptr_t)ptr) + off);
 }
 template <typename T>
@@ -48,7 +50,7 @@ inline const T& dAccess(void const* ptr, uintptr_t off) {
 #define __WEAK __declspec(selectany)
 
 #if 0
-template <CHash,CHash>
+template <CHash, CHash>
 __WEAK void* __ptr_cache;
 template <CHash hash, CHash hash2>
 inline static void* dlsym_cache(const char* fn) {
@@ -81,7 +83,7 @@ public:
 	THookRegister(void* address, void* hook, void** org) {
 		auto ret = HookFunction(address, org, hook);
 		if (ret != 0) {
-			printf("FailedToHook: %p\n",address);
+			printf("FailedToHook: %p\n", address);
 		}
 	}
 	THookRegister(char const* sym, void* hook, void** org) {
@@ -114,9 +116,9 @@ public:
 	}
 };
 #define VA_EXPAND(...) __VA_ARGS__
-template <CHash,CHash>
+template <CHash, CHash>
 struct THookTemplate;
-template <CHash,CHash>
+template <CHash, CHash>
 extern THookRegister THookRegisterTemplate;
 
 #define _TInstanceHook(class_inh, pclass, iname, sym, ret, ...)                                             \
